@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import pandas as pd
 
+from .indicators import macd
+
 
 def moving_average_cross(
     close: pd.Series,
@@ -23,3 +25,16 @@ def moving_average_cross(
     fast_ma = close.rolling(window=fast, min_periods=fast).mean()
     slow_ma = close.rolling(window=slow, min_periods=slow).mean()
     return (fast_ma > slow_ma).fillna(False).astype("int8").rename("signal")
+
+
+def macd_cross(
+    close: pd.Series,
+    fast: int = 12,
+    slow: int = 26,
+    signal: int = 9,
+) -> pd.Series:
+    """Return a 0/1 long-only position intention from a MACD cross."""
+    macd_values = macd(close, fast=fast, slow=slow, signal=signal)
+    return (macd_values["macd"] > macd_values["signal"]).fillna(False).astype(
+        "int8"
+    ).rename("signal")
